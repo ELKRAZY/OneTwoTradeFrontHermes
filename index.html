@@ -230,14 +230,6 @@ function render(){
       h += '<tr><td class="num">'+bl[k]+'</td><td class="mo" style="font-size:11.5px">'+esc(k)+'</td></tr>';
     h += '</table></div>';
   }
-  for(const book of ['screened','control']){
-    const b = BK[book]; if(!b) continue;
-    if($('[data-k="cap-'+book+'"]')) anim($('[data-k="cap-'+book+'"]'), b.capital, 0);
-    if($('[data-k="av-'+book+'"]'))  anim($('[data-k="av-'+book+'"]'), b.available, 2);
-    if($('[data-k="de-'+book+'"]'))  anim($('[data-k="de-'+book+'"]'), b.deployed, 2);
-    if($('[data-k="fe-'+book+'"]'))  anim($('[data-k="fe-'+book+'"]'), b.fees, 2);
-  }
-
   /* 3 · where they die, with animated bars */
   h += '<h2>3 · Dónde mueren los candidatos</h2>';
   for(const e of S.envs){ const c = S.cash[e]||{};
@@ -299,6 +291,14 @@ function render(){
   anim($('[data-k="scr"]'), g.screened);
   anim($('[data-k="col"]'), g.collected);
   setTimeout(()=>{ const b=$('#gb'); if(b) b.style.width = pct+'%'; }, 60);
+  for(const book of ['screened','control']){
+    const b = (S.book || {})[book]; if(!b) continue;
+    const q = k => $('[data-k="'+k+'-'+book+'"]');
+    if(q('cap')) anim(q('cap'), b.capital, 0);
+    if(q('av'))  anim(q('av'), b.available, 2);
+    if(q('de'))  anim(q('de'), b.deployed, 2);
+    if(q('fe'))  anim(q('fe'), b.fees, 2);
+  }
   if(newC||newD) $('#sub').innerHTML = 'entornos: '+esc(S.envs.join(', ')) +
     (FIRST ? ' · <b>primera carga</b>: '+newC+' candidatos y '+newD+' decisiones en el fichero'
            : ' · <b class="ok">'+newC+' candidatos y '+newD+' decisiones nuevos desde tu última visita</b>');
