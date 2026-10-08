@@ -180,6 +180,64 @@ function render(){
       +  ' cand · '+n2(c.entries)+' entradas · '+n2(c.rejects)+' rechazos</span></div>'; }
   h += '</div></div>';
 
+  /* 2b · el libro de papel: capital y P&L. Esto es lo que faltaba. */
+  const BK = S.book || {};
+  h += '<h2>2b · Libro de papel: capital y P&amp;L</h2>';
+  for(const book of ['screened','control']){
+    const b = BK[book]; if(!b) continue;
+    const lab = book==='screened' ? 'estrategia · solo lo que pasa TODOS los checks'
+                                  : 'control · todo lo que sobrevive los cortes gratis';
+    const pl = b.realized + b.unrealized;
+    h += '<div class="p" style="margin-bottom:9px">'
+      +  '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">'
+      +  '<b>'+esc(lab)+'</b><span class="s">'+b.open+' abiertas · '+b.closed+' cerradas</span></div>'
+      +  '<div class="g" style="margin-top:9px">'
+      +  '<div><div class="s">capital de simulación</div><div class="big" data-k="cap-'+book+'">0</div></div>'
+      +  '<div><div class="s">disponible</div><div class="big" data-k="av-'+book+'">0</div></div>'
+      +  '<div><div class="s">desplegado</div><div class="big" data-k="de-'+book+'">0</div></div>'
+      +  '<div><div class="s">P&amp;L total</div><div class="big '+(pl>0?'ok':pl<0?'bad':'di')+'">'
+      +  (pl>0?'+':'')+n2(pl,2)+'</div>'
+      +  '<div class="s">realizado '+n2(b.realized,2)+' · no realizado '+n2(b.unrealized,2)+'</div></div>'
+      +  '<div><div class="s">comisiones pagadas</div><div class="big" data-k="fe-'+book+'">0</div></div>'
+      +  '</div>';
+    if(b.positions.length){
+      h += '<table style="margin-top:11px"><tr><th>estado</th><th>abierta</th><th>coste €</th>'
+        +  '<th>valor €</th><th>P&amp;L €</th><th>%</th><th>precio</th></tr>';
+      for(const p of b.positions){
+        const cl = p.state==='abierta' ? 'wa' : 'di';
+        h += '<tr><td class="'+cl+'">'+esc(p.state)+'</td>'
+          +  '<td class="mo">'+esc((p.opened||'').slice(5,16))+'</td>'
+          +  '<td class="num">'+n2(p.cost,2)+'</td>'
+          +  '<td class="num">'+(p.value===null?'—':n2(p.value,2))+'</td>'
+          +  '<td class="num '+((p.pnl||0)>0?'ok':(p.pnl||0)<0?'bad':'')+'">'
+          +  (p.pnl===null?'—':(p.pnl>0?'+':'')+n2(p.pnl,2))+'</td>'
+          +  '<td class="num">'+(p.ret===null?'—':(p.ret>0?'+':'')+n2(p.ret*100,1)+'%')+'</td>'
+          +  '<td class="di" style="font-size:11px">'+esc((p.venue||'').slice(0,46))+'</td></tr>';
+      }
+      h += '</table>';
+    } else {
+      h += '<div class="s" style="margin-top:9px">Sin posiciones todavía. El capital está '
+        +  'entero y sin tocar: no se ha comprado nada.</div>';
+    }
+    h += '</div>';
+  }
+  const bl = BK._blocked;
+  if(bl && Object.keys(bl).length){
+    h += '<div class="p"><div class="s" style="margin-bottom:5px"><b>Por qué el libro está '
+      +  'vacío</b> — el motivo medido que se registró en el ledger cada vez que se intentó '
+      +  'entrar:</div><table><tr><th>n</th><th>motivo medido en vivo</th></tr>';
+    for(const k of Object.keys(bl))
+      h += '<tr><td class="num">'+bl[k]+'</td><td class="mo" style="font-size:11.5px">'+esc(k)+'</td></tr>';
+    h += '</table></div>';
+  }
+  for(const book of ['screened','control']){
+    const b = BK[book]; if(!b) continue;
+    if($('[data-k="cap-'+book+'"]')) anim($('[data-k="cap-'+book+'"]'), b.capital, 0);
+    if($('[data-k="av-'+book+'"]'))  anim($('[data-k="av-'+book+'"]'), b.available, 2);
+    if($('[data-k="de-'+book+'"]'))  anim($('[data-k="de-'+book+'"]'), b.deployed, 2);
+    if($('[data-k="fe-'+book+'"]'))  anim($('[data-k="fe-'+book+'"]'), b.fees, 2);
+  }
+
   /* 3 · where they die, with animated bars */
   h += '<h2>3 · Dónde mueren los candidatos</h2>';
   for(const e of S.envs){ const c = S.cash[e]||{};
