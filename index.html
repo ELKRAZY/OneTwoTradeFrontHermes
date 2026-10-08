@@ -242,8 +242,8 @@ function render(){
     h += '<div class="s" style="margin:7px 0 3px">env=<b>'+esc(e)+'</b></div>';
     if(!c.stages || !c.stages.length){ h += '<div class="p di">todavía sin checks</div>'; continue; }
     let max = 1; for(const s of c.stages) max = Math.max(max,(s.pass||0)+(s.fail||0)+(s.unverifiable||0));
-    h += '<div class="p"><table><tr><th>etapa</th><th class="n">pass</th><th class="n">fail</th>'
-      +  '<th class="n">?</th><th style="width:34%"></th></tr>';
+    h += '<div class="p"><table style="max-width:660px"><tr><th>etapa</th><th class="n">pass</th>'
+      +  '<th class="n">fail</th><th class="n">?</th><th style="width:34%"></th></tr>';
     for(const s of c.stages){ const tot=(s.pass||0)+(s.fail||0)+(s.unverifiable||0);
       h += '<tr><td class="mo">'+esc(s.stage)+'</td><td class="num ok">'+n2(s.pass||0)+'</td>'
         +  '<td class="num bad">'+n2(s.fail||0)+'</td><td class="num wa">'+n2(s.unverifiable||0)+'</td>'
