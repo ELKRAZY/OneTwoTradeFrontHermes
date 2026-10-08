@@ -234,8 +234,9 @@ function render(){
   anim($('[data-k="scr"]'), g.screened);
   anim($('[data-k="col"]'), g.collected);
   setTimeout(()=>{ const b=$('#gb'); if(b) b.style.width = pct+'%'; }, 60);
-  if(newC||newD) $('#sub').innerHTML = 'entornos: '+esc(S.envs.join(', '))+
-    ' · <b class="ok">'+newC+' candidatos y '+newD+' decisiones nuevos desde tu última visita</b>';
+  if(newC||newD) $('#sub').innerHTML = 'entornos: '+esc(S.envs.join(', ')) +
+    (FIRST ? ' · <b>primera carga</b>: '+newC+' candidatos y '+newD+' decisiones en el fichero'
+           : ' · <b class="ok">'+newC+' candidatos y '+newD+' decisiones nuevos desde tu última visita</b>');
 
   for(const c of S.candidates) LAST_SEEN['c:'+c.id]=1;
   for(const d of S.decisions) LAST_SEEN['d:'+d.decision_id]=1;
