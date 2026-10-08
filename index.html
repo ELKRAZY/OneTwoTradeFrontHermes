@@ -1,0 +1,275 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark"><title>FOMO · en vivo</title>
+<style>
+:root{--bg:#08070d;--pa:#141120;--pa2:#1b1729;--li:#2b2440;--tx:#eae6f5;--di:#8b83a8;
+--ac:#ff2d95;--ok:#31d68a;--bad:#ff4d6d;--wa:#ffb020;--mo:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#1d1030 0,var(--bg) 60%);
+color:var(--tx);font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+-webkit-text-size-adjust:100%}
+.w{max-width:1080px;margin:0 auto;padding:14px 12px 70px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;
+border-bottom:2px solid var(--ac);padding-bottom:8px;margin-bottom:6px}
+h1{font-size:16px;margin:0;letter-spacing:.16em;text-transform:uppercase}
+h1 i{color:var(--ac);font-style:normal}
+.s{color:var(--di);font-size:11.5px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);
+margin-right:6px;box-shadow:0 0 0 0 rgba(49,214,138,.7);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(49,214,138,.55)}70%{box-shadow:0 0 0 10px rgba(49,214,138,0)}
+100%{box-shadow:0 0 0 0 rgba(49,214,138,0)}}
+h2{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--di);margin:24px 0 7px;
+border-left:3px solid var(--ac);padding-left:8px}
+.p{background:linear-gradient(180deg,var(--pa2),var(--pa));border:1px solid var(--li);
+border-radius:10px;padding:11px 13px}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--di);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
+border-bottom:1px solid var(--li);padding:5px 5px;white-space:nowrap}
+td{padding:5px;border-bottom:1px solid #1e1a2c;vertical-align:top;overflow-wrap:anywhere}
+tr:last-child td{border-bottom:none}
+.big{font:600 26px/1.1 var(--mo);letter-spacing:-.5px}
+.mo{font-family:var(--mo)}.num{font-family:var(--mo);text-align:right;white-space:nowrap}
+.ok{color:var(--ok)}.bad{color:var(--bad)}.wa{color:var(--wa)}.di{color:var(--di)}
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font:10.5px var(--mo);
+border:1px solid var(--li);background:#1d1830;white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:#1b5c40}.pill.bad{color:var(--bad);border-color:#5c2030}
+.pill.wa{color:var(--wa);border-color:#5c4520}.pill.di{color:var(--di)}
+.kv{display:flex;justify-content:space-between;gap:8px;padding:3px 0;border-bottom:1px solid #1e1a2c;
+align-items:baseline}.kv:last-child{border-bottom:none}
+.bar{height:9px;background:#1d1830;border-radius:5px;overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ac),#ff7ac1);
+border-radius:5px;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.kill i{background:linear-gradient(90deg,#ff4d6d,#ff8fa3)}
+#warn{display:none;background:#3a1020;border:1px solid var(--bad);color:#ffd9e2;padding:9px 11px;
+border-radius:9px;margin:10px 0;font-size:12.5px}
+#gate{position:fixed;inset:0;background:rgba(8,7,13,.97);display:flex;align-items:center;
+justify-content:center;padding:20px;z-index:50}
+#gate .box{background:var(--pa);border:1px solid var(--li);border-radius:12px;padding:20px;
+max-width:430px;width:100%}
+#gate h3{margin:0 0 6px;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
+#gate input{width:100%;margin-top:12px;padding:11px;border-radius:8px;border:1px solid var(--li);
+background:#0d0b16;color:var(--tx);font:13px var(--mo)}
+#gate button{margin-top:12px;width:100%;padding:11px;border-radius:8px;border:0;cursor:pointer;
+background:var(--ac);color:#fff;font-weight:600;letter-spacing:.06em}
+#gate .err{color:var(--bad);font-size:12px;min-height:16px;margin-top:8px}
+.rownew{animation:flash 2.6s ease-out}
+@keyframes flash{0%{background:rgba(255,45,149,.22)}100%{background:transparent}}
+.spark{display:flex;align-items:flex-end;gap:2px;height:46px;margin-top:8px}
+.spark b{flex:1;background:linear-gradient(180deg,var(--ac),#7a1560);border-radius:2px 2px 0 0;
+min-height:2px;transition:height .8s cubic-bezier(.2,.8,.2,1)}
+footer{margin-top:28px;color:var(--di);font-size:11px;border-top:1px solid var(--li);padding-top:9px}
+code{font:11.5px var(--mo);background:var(--pa2);padding:1px 5px;border-radius:4px}
+.fresh{font-size:10.5px;color:var(--di)}
+</style></head><body>
+<div id="gate"><div class="box">
+  <h3>FOMO · estado</h3>
+  <div class="s">El contenido está cifrado. La contraseña se queda en este navegador y no se
+  envía a ningún sitio: sirve para descifrar en local lo que el VPS cifró.</div>
+  <input id="pw" type="password" placeholder="contraseña" autocomplete="current-password">
+  <button id="go">descifrar</button>
+  <div class="err" id="err"></div>
+</div></div>
+
+<div class="w">
+<header>
+  <div><h1>FOMO <i>/ en vivo</i></h1>
+  <div class="s" id="sub">conectando…</div></div>
+  <div class="s" style="text-align:right">
+    <span class="dot" id="dot"></span><span id="age">—</span><br>
+    <span class="fresh" id="meta"></span></div>
+</header>
+<div id="warn"></div><div id="root"></div>
+<footer>Descifrado y dibujado en tu navegador. El VPS solo deja un fichero cifrado en un repo
+público: no hay ningún proceso escuchando, ningún puerto abierto y nada legible publicado.
+Actualizado <span id="cad"></span>. Si el aviso de integridad está en rojo, todo lo de abajo es
+sospechoso.</footer>
+</div>
+
+<script>
+const BLOB = "https://raw.githubusercontent.com/ELKRAZY/OneTwoTradeFrontHermes/state/state.enc";
+const ITER_FALLBACK = 600000;
+let STATE = null, LAST_SEEN = {}, FIRST = true;
+
+const $ = s => document.querySelector(s);
+const esc = s => (s===null||s===undefined)?'':String(s)
+  .replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const n2 = (v,d=0)=> (v===null||v===undefined) ? '—'
+  : Number(v).toLocaleString('es-ES',{minimumFractionDigits:d,maximumFractionDigits:d});
+function b64buf(b64){const s=atob(b64);const a=new Uint8Array(s.length);
+  for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;}
+function ago(iso){ if(!iso) return '—';
+  const d=(Date.now()-new Date(iso).getTime())/1000;
+  if(d<90) return Math.max(0,Math.round(d))+' s';
+  if(d<5400) return Math.round(d/60)+' min';
+  return Math.round(d/3600)+' h'; }
+
+async function deriveAndDecrypt(pass, env){
+  const enc = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+  const key = await crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt:b64buf(env.salt), iterations: env.iter||ITER_FALLBACK, hash:'SHA-256'},
+    base, {name:'AES-GCM', length:256}, false, ['decrypt']);
+  const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64buf(env.iv)}, key, b64buf(env.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function fetchBlob(){
+  const r = await fetch(BLOB + '?t=' + Date.now(), {cache:'no-store'});
+  if(!r.ok) throw new Error('http '+r.status);
+  return await r.json();
+}
+
+/* animated number: counts from previous value to the new one */
+const VALS = {};
+function anim(el, to, dec=0){
+  const key = el.dataset.k || (el.dataset.k = Math.random().toString(36).slice(2));
+  const from = (VALS[key]===undefined) ? 0 : VALS[key];
+  VALS[key] = to;
+  if(FIRST){ el.textContent = n2(to,dec); return; }
+  const t0 = performance.now(), dur = 700;
+  (function step(t){
+    const p = Math.min(1,(t-t0)/dur), e = 1-Math.pow(1-p,3);
+    el.textContent = n2(from+(to-from)*e, dec);
+    if(p<1) requestAnimationFrame(step); else el.textContent = n2(to,dec);
+  })(t0);
+}
+
+function render(){
+  const S = STATE; if(!S) return;
+  $('#sub').textContent = 'entornos: ' + (S.envs.join(', ')||'—') +
+    ' · papel hasta que la puerta se cumpla';
+  $('#age').textContent = 'actualizado hace ' + ago(S.generated_at);
+  $('#meta').textContent = S.ledger;
+  const w = $('#warn');
+  if(!S.integrity.ok){ w.style.display='block';
+    w.innerHTML = '<b>INTEGRIDAD ROTA</b><br>' + esc(S.integrity.problems.join(' · ')); }
+  else w.style.display='none';
+
+  let h = '';
+  /* 1 · integrity */
+  h += '<h2>1 · Integridad del registro</h2><div class="p"><div class="g">'
+    +  '<div><div class="big '+(S.integrity.ok?'ok':'bad')+'">'+(S.integrity.ok?'OK':'ROTA')+'</div>'
+    +  '<div class="s">' + S.integrity.tables.length + ' tablas encadenadas</div></div>'
+    +  '<div><table><tr><th>tabla</th><th>filas</th><th>guarda</th></tr>';
+  for(const t of S.integrity.tables)
+    h += '<tr><td class="mo">'+esc(t.name)+'</td><td class="num">'+n2(t.rows)+'</td><td>'
+      +  (t.guarded?'<span class="ok">ok</span>':'<span class="bad">falta</span>')+'</td></tr>';
+  h += '</table></div></div></div>';
+
+  /* 2 · money + gate */
+  const g = S.gate, pct = Math.min(100, Math.round(100*g.screened/g.target));
+  h += '<h2>2 · Dinero y puerta</h2><div class="g">'
+    +  '<div class="p"><div class="s">capital real</div><div class="big" data-k="cash">0</div>'
+    +  '<div class="s">tamaño por posición '+esc(S.money.per_position)+' €</div></div>'
+    +  '<div class="p"><div class="s">cribados en papel</div>'
+    +  '<div class="big"><span data-k="scr">0</span><span class="di" style="font-size:14px">/'+g.target+'</span></div>'
+    +  '<div class="bar"><i id="gb" style="width:0%"></i></div>'
+    +  '<div class="kv"><span class="s">recolectados</span><span class="num" data-k="col">0</span></div>'
+    +  '<div class="kv"><span class="s">intentos reales</span><span class="num">'+n2(g.real_attempts)+'/5</span></div>'
+    +  '<div class="s" style="margin-top:4px">dinero real congelado hasta que la puerta se cumpla</div></div>'
+    +  '<div class="p"><div class="s">por entorno</div>';
+  for(const e of S.envs){ const c = S.cash[e]||{};
+    h += '<div class="kv"><span class="mo">'+esc(e)+'</span><span class="num">'+n2(c.candidates)
+      +  ' cand · '+n2(c.entries)+' entradas · '+n2(c.rejects)+' rechazos</span></div>'; }
+  h += '</div></div>';
+
+  /* 3 · where they die, with animated bars */
+  h += '<h2>3 · Dónde mueren los candidatos</h2>';
+  for(const e of S.envs){ const c = S.cash[e]||{};
+    h += '<div class="s" style="margin:7px 0 3px">env=<b>'+esc(e)+'</b></div>';
+    if(!c.stages || !c.stages.length){ h += '<div class="p di">todavía sin checks</div>'; continue; }
+    let max = 1; for(const s of c.stages) max = Math.max(max,(s.pass||0)+(s.fail||0)+(s.unverifiable||0));
+    h += '<div class="p"><table><tr><th>etapa</th><th>pass</th><th>fail</th><th>?</th><th></th></tr>';
+    for(const s of c.stages){ const tot=(s.pass||0)+(s.fail||0)+(s.unverifiable||0);
+      h += '<tr><td class="mo">'+esc(s.stage)+'</td><td class="num ok">'+n2(s.pass||0)+'</td>'
+        +  '<td class="num bad">'+n2(s.fail||0)+'</td><td class="num wa">'+n2(s.unverifiable||0)+'</td>'
+        +  '<td><div class="bar kill"><i style="width:'+Math.round(100*tot/max)+'%"></i></div></td></tr>'; }
+    h += '</table></div>';
+  }
+
+  /* sparkline of intake by hour, from the candidates we have */
+  const byHour = {};
+  for(const c of S.candidates){ const k=(c.discovered||'').slice(0,13); if(k) byHour[k]=(byHour[k]||0)+1; }
+  const keys = Object.keys(byHour).sort().slice(-24);
+  if(keys.length){ const mx = Math.max(...keys.map(k=>byHour[k]));
+    h += '<h2>Entrada de candidatos por hora</h2><div class="p"><div class="spark">';
+    for(const k of keys) h += '<b style="height:'+Math.max(2,Math.round(100*byHour[k]/mx))+'%" title="'
+      + esc(k)+':00Z · '+byHour[k]+'"></b>';
+    h += '</div><div class="s">' + keys[0] + 'Z → ' + keys[keys.length-1] + 'Z · máx '
+      + mx + '/h · ' + keys.reduce((a,k)=>a+byHour[k],0) + ' candidatos</div></div>'; }
+
+  /* 4 · candidates, new ones highlighted */
+  h += '<h2>4 · Candidatos y sus checks obligatorios</h2><div class="p" style="overflow-x:auto"><table>'
+    +  '<tr><th>env</th><th>token</th><th>liq</th><th>edad h</th><th>pass</th><th>fail</th><th>?</th>'
+    +  '<th>decisión</th></tr>';
+  let newC = 0;
+  for(const c of S.candidates){
+    const isNew = !LAST_SEEN['c:'+c.id];
+    if(isNew) newC++;
+    const d = c.decision==='enter'?'<span class="pill ok">enter</span>'
+            : c.decision==='skip'?'<span class="pill bad">skip</span>':'<span class="pill di">—</span>';
+    h += '<tr class="'+(isNew&&!FIRST?'rownew':'')+'"><td class="mo">'+esc(c.env)+'</td>'
+      +  '<td class="mo">'+esc(c.symbol||c.id)+'</td><td class="num">'+n2(c.liq)+'</td>'
+      +  '<td class="num">'+n2(c.age_h,2)+'</td><td class="num ok">'+n2(c.n_pass)+'</td>'
+      +  '<td class="num bad">'+n2(c.n_fail)+'</td><td class="num wa">'+n2(c.n_unk)+'</td>'
+      +  '<td>'+d+'</td></tr>';
+  }
+  h += '</table></div>';
+
+  /* 5 · decisions, new ones highlighted */
+  h += '<h2>5 · Últimas decisiones, con el mecanismo</h2><div class="p" style="overflow-x:auto"><table>'
+    +  '<tr><th>cuándo</th><th>decisión</th><th>candidato</th><th>mecanismo</th></tr>';
+  let newD = 0;
+  for(const d of S.decisions.slice(0,18)){
+    const isNew = !LAST_SEEN['d:'+d.decision_id];
+    if(isNew) newD++;
+    h += '<tr class="'+(isNew&&!FIRST?'rownew':'')+'"><td class="mo">'+esc(d.decided_at)+'</td>'
+      +  '<td class="mo">'+esc(d.decision)+'</td><td class="mo">'+esc(d.candidate_id)+'</td>'
+      +  '<td class="di">'+esc((d.mechanism||'').slice(0,95))+'</td></tr>';
+  }
+  h += '</table></div>';
+
+  $('#root').innerHTML = h;
+  anim($('[data-k="cash"]'), S.money.net, 2);
+  anim($('[data-k="scr"]'), g.screened);
+  anim($('[data-k="col"]'), g.collected);
+  setTimeout(()=>{ const b=$('#gb'); if(b) b.style.width = pct+'%'; }, 60);
+  if(newC||newD) $('#sub').innerHTML = 'entornos: '+esc(S.envs.join(', '))+
+    ' · <b class="ok">'+newC+' candidatos y '+newD+' decisiones nuevos desde tu última visita</b>';
+
+  for(const c of S.candidates) LAST_SEEN['c:'+c.id]=1;
+  for(const d of S.decisions) LAST_SEEN['d:'+d.decision_id]=1;
+  try{ localStorage.setItem('fomo_seen', JSON.stringify(LAST_SEEN)); }catch(e){}
+  if(S.generated_at) LAST_TS = new Date(S.generated_at).getTime();
+  FIRST = false;
+}
+
+let LAST_TS = null;
+setInterval(()=>{ if(LAST_TS) $('#age').textContent = 'actualizado hace '+ago(new Date(LAST_TS).toISOString()); }, 1000);
+
+async function load(){
+  const pass = $('#pw').value || localStorage.getItem('fomo_pw') || '';
+  if(!pass){ $('#gate').style.display='flex'; return; }
+  try{
+    $('#err').textContent='descargando…';
+    const env = await fetchBlob();
+    const st = await deriveAndDecrypt(pass, env);
+    STATE = st;
+    localStorage.setItem('fomo_pw', pass);
+    $('#gate').style.display='none';
+    try{ LAST_SEEN = JSON.parse(localStorage.getItem('fomo_seen')||'{}'); }catch(e){ LAST_SEEN={}; }
+    render();
+    $('#err').textContent='';
+  }catch(e){
+    const msg = String(e && e.message || e);
+    $('#gate').style.display='flex';
+    $('#err').textContent = /decrypt|OperationError/i.test(msg)
+      ? 'no se pudo descifrar: contraseña incorrecta, o el fichero cambió.'
+      : 'error: '+msg;
+  }
+}
+$('#go').addEventListener('click', load);
+$('#pw').addEventListener('keydown', e => { if(e.key==='Enter') load(); });
+load();
+setInterval(load, 60000);
+</script></body></html>
