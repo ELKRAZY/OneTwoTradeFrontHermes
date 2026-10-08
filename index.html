@@ -26,6 +26,11 @@ border-radius:10px;padding:11px 13px}
 table{width:100%;border-collapse:collapse;font-size:12.5px}
 th{text-align:left;color:var(--di);font-size:10px;letter-spacing:.08em;text-transform:uppercase;
 border-bottom:1px solid var(--li);padding:5px 5px;white-space:nowrap}
+/* Numeric columns: the header must sit on the SAME side as the values. With th left and td.num
+   right, a wide table on an ultrawide screen pushes the number to the far right of its cell
+   while the label stays at the far left, and the row reads as if the numbers belong to the
+   neighbouring column. */
+th.n{text-align:right}
 td{padding:5px;border-bottom:1px solid #1e1a2c;vertical-align:top;overflow-wrap:anywhere}
 tr:last-child td{border-bottom:none}
 .big{font:600 26px/1.1 var(--mo);letter-spacing:-.5px}
@@ -157,7 +162,7 @@ function render(){
   h += '<h2>1 · Integridad del registro</h2><div class="p"><div class="g">'
     +  '<div><div class="big '+(S.integrity.ok?'ok':'bad')+'">'+(S.integrity.ok?'OK':'ROTA')+'</div>'
     +  '<div class="s">' + S.integrity.tables.length + ' tablas encadenadas</div></div>'
-    +  '<div><table><tr><th>tabla</th><th>filas</th><th>guarda</th></tr>';
+    +  '<div><table><tr><th>tabla</th><th class="n">filas</th><th>guarda</th></tr>';
   for(const t of S.integrity.tables)
     h += '<tr><td class="mo">'+esc(t.name)+'</td><td class="num">'+n2(t.rows)+'</td><td>'
       +  (t.guarded?'<span class="ok">ok</span>':'<span class="bad">falta</span>')+'</td></tr>';
@@ -201,8 +206,9 @@ function render(){
       +  '<div><div class="s">comisiones pagadas</div><div class="big" data-k="fe-'+book+'">0</div></div>'
       +  '</div>';
     if(b.positions.length){
-      h += '<table style="margin-top:11px"><tr><th>estado</th><th>abierta</th><th>coste €</th>'
-        +  '<th>valor €</th><th>P&amp;L €</th><th>%</th><th>precio</th></tr>';
+      h += '<table style="margin-top:11px"><tr><th>estado</th><th>abierta</th>'
+        +  '<th class="n">coste €</th><th class="n">valor €</th><th class="n">P&amp;L €</th>'
+        +  '<th class="n">%</th><th>precio</th></tr>';
       for(const p of b.positions){
         const cl = p.state==='abierta' ? 'wa' : 'di';
         h += '<tr><td class="'+cl+'">'+esc(p.state)+'</td>'
@@ -225,7 +231,7 @@ function render(){
   if(bl && Object.keys(bl).length){
     h += '<div class="p"><div class="s" style="margin-bottom:5px"><b>Por qué el libro está '
       +  'vacío</b> — el motivo medido que se registró en el ledger cada vez que se intentó '
-      +  'entrar:</div><table><tr><th>n</th><th>motivo medido en vivo</th></tr>';
+      +  'entrar:</div><table><tr><th class="n">n</th><th>motivo medido en vivo</th></tr>';
     for(const k of Object.keys(bl))
       h += '<tr><td class="num">'+bl[k]+'</td><td class="mo" style="font-size:11.5px">'+esc(k)+'</td></tr>';
     h += '</table></div>';
@@ -236,7 +242,8 @@ function render(){
     h += '<div class="s" style="margin:7px 0 3px">env=<b>'+esc(e)+'</b></div>';
     if(!c.stages || !c.stages.length){ h += '<div class="p di">todavía sin checks</div>'; continue; }
     let max = 1; for(const s of c.stages) max = Math.max(max,(s.pass||0)+(s.fail||0)+(s.unverifiable||0));
-    h += '<div class="p"><table><tr><th>etapa</th><th>pass</th><th>fail</th><th>?</th><th></th></tr>';
+    h += '<div class="p"><table><tr><th>etapa</th><th class="n">pass</th><th class="n">fail</th>'
+      +  '<th class="n">?</th><th style="width:34%"></th></tr>';
     for(const s of c.stages){ const tot=(s.pass||0)+(s.fail||0)+(s.unverifiable||0);
       h += '<tr><td class="mo">'+esc(s.stage)+'</td><td class="num ok">'+n2(s.pass||0)+'</td>'
         +  '<td class="num bad">'+n2(s.fail||0)+'</td><td class="num wa">'+n2(s.unverifiable||0)+'</td>'
@@ -257,7 +264,8 @@ function render(){
 
   /* 4 · candidates, new ones highlighted */
   h += '<h2>4 · Candidatos y sus checks obligatorios</h2><div class="p" style="overflow-x:auto"><table>'
-    +  '<tr><th>env</th><th>token</th><th>liq</th><th>edad h</th><th>pass</th><th>fail</th><th>?</th>'
+    +  '<tr><th>env</th><th>token</th><th class="n">liq</th><th class="n">edad h</th>'
+    +  '<th class="n">pass</th><th class="n">fail</th><th class="n">?</th>'
     +  '<th>decisión</th></tr>';
   let newC = 0;
   for(const c of S.candidates){
