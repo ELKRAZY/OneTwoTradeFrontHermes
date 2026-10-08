@@ -113,9 +113,16 @@ async function deriveAndDecrypt(pass, env){
   const pt = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64buf(env.iv)}, key, b64buf(env.ct));
   return JSON.parse(new TextDecoder().decode(pt));
 }
+let ETAG = null, LASTFETCH = null, NOTMOD = false;
 async function fetchBlob(){
-  const r = await fetch(BLOB + '?t=' + Date.now(), {cache:'no-store'});
+  const headers = {};
+  if(ETAG) headers['If-None-Match'] = ETAG;      // revalidate instead of re-downloading 107 KB
+  const r = await fetch(BLOB, {cache:'no-cache', headers});
+  LASTFETCH = new Date();
+  if(r.status === 304){ NOTMOD = true; return null; }   // unchanged: nothing to decrypt
   if(!r.ok) throw new Error('http '+r.status);
+  ETAG = r.headers.get('etag');
+  NOTMOD = false;
   return await r.json();
 }
 
@@ -254,6 +261,11 @@ async function load(){
   try{
     $('#err').textContent='descargando…';
     const env = await fetchBlob();
+    if(env === null){                                  // 304: the data has not changed
+      if($('#age')) $('#age').textContent = 'sin cambios · comprobado ' +
+        LASTFETCH.toLocaleTimeString('es-ES');
+      return;
+    }
     const st = await deriveAndDecrypt(pass, env);
     STATE = st;
     localStorage.setItem('fomo_pw', pass);
