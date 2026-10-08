@@ -124,6 +124,7 @@ async function fetchBlob(){
   if(ETAG) headers['If-None-Match'] = ETAG;      // revalidate instead of re-downloading 107 KB
   const r = await fetch(BLOB, {cache:'no-cache', headers});
   LASTFETCH = new Date();
+  LAST_CHECK = LASTFETCH;
   if(r.status === 304){ NOTMOD = true; return null; }   // unchanged: nothing to decrypt
   if(!r.ok) throw new Error('http '+r.status);
   ETAG = r.headers.get('etag');
@@ -150,7 +151,8 @@ function render(){
   const S = STATE; if(!S) return;
   $('#sub').textContent = 'entornos: ' + (S.envs.join(', ')||'—') +
     ' · papel hasta que la puerta se cumpla';
-  $('#age').textContent = 'actualizado hace ' + ago(S.generated_at);
+  $('#age').textContent = 'datos: hace ' + ago(S.generated_at);
+  LAST_TS = S.generated_at;
   $('#meta').textContent = S.ledger;
   const w = $('#warn');
   if(!S.integrity.ok){ w.style.display='block';
@@ -318,8 +320,13 @@ function render(){
   FIRST = false;
 }
 
-let LAST_TS = null;
-setInterval(()=>{ if(LAST_TS) $('#age').textContent = 'actualizado hace '+ago(new Date(LAST_TS).toISOString()); }, 1000);
+let LAST_TS = null, LAST_CHECK = null;
+setInterval(()=>{
+  if(!LAST_TS) return;
+  const d = 'datos: hace ' + ago(new Date(LAST_TS).toISOString());
+  const c = LAST_CHECK ? ' · comprobado: hace ' + ago(new Date(LAST_CHECK).toISOString()) : '';
+  $('#age').textContent = d + c;
+}, 1000);
 
 async function load(){
   const pass = $('#pw').value || localStorage.getItem('fomo_pw') || '';
@@ -328,8 +335,9 @@ async function load(){
     $('#err').textContent='descargando…';
     const env = await fetchBlob();
     if(env === null){                                  // 304: the data has not changed
-      if($('#age')) $('#age').textContent = 'sin cambios · comprobado ' +
-        LASTFETCH.toLocaleTimeString('es-ES');
+      LAST_CHECK = new Date();
+      if($('#age')) $('#age').textContent = 'sin cambios desde hace ' +
+        ago(new Date(LAST_TS || LASTFETCH).toISOString()) + ' · comprobado ahora';
       return;
     }
     const st = await deriveAndDecrypt(pass, env);
