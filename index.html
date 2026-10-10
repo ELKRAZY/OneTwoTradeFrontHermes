@@ -66,6 +66,16 @@ min-height:2px;transition:height .8s cubic-bezier(.2,.8,.2,1)}
 footer{margin-top:28px;color:var(--di);font-size:11px;border-top:1px solid var(--li);padding-top:9px}
 code{font:11.5px var(--mo);background:var(--pa2);padding:1px 5px;border-radius:4px}
 .fresh{font-size:10.5px;color:var(--di)}
+/* Filtro de posiciones. Los botones llevan el recuento dentro para que se vea qué hay debajo
+   antes de pulsarlos, y el activo se marca con color, no con un icono que haya que recordar. */
+.fb{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 4px}
+.fb button{padding:3px 9px;border-radius:11px;border:1px solid var(--li);background:#1d1830;
+color:var(--di);font:10.5px var(--mo);cursor:pointer;white-space:nowrap}
+.fb button:hover{border-color:var(--ac)}
+.fb button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.fb button.win.on{background:var(--ok);border-color:var(--ok);color:#06120c}
+.fb button.loss.on{background:var(--bad);border-color:var(--bad);color:#fff}
+.fb .cnt{opacity:.75}
 </style></head><body>
 <div id="gate"><div class="box">
   <h3>FOMO · estado</h3>
@@ -95,6 +105,12 @@ sospechoso.</footer>
 const BLOB = "https://raw.githubusercontent.com/ELKRAZY/OneTwoTradeFrontHermes/state/state.enc";
 const ITER_FALLBACK = 600000;
 let STATE = null, LAST_SEEN = {}, FIRST = true;
+/* Filtro de la tabla de posiciones. Vive fuera de render() a proposito: render() reescribe el
+   DOM entero cada minuto, asi que un filtro guardado en el DOM se perderia en cada refresco y
+   volverias a ver la lista completa sin darte cuenta. */
+let PFILTER = 'all';
+const PF_BUCKET = p => p.state === 'abierta' ? 'open' : ((p.pnl || 0) > 0 ? 'win' : 'loss');
+function setPosFilter(k){ PFILTER = k; render(); }
 
 const $ = s => document.querySelector(s);
 const esc = s => (s===null||s===undefined)?'':String(s)
@@ -207,25 +223,54 @@ function render(){
       +  '<div class="s">realizado '+n2(b.realized,2)+' · no realizado '+n2(b.unrealized,2)+'</div></div>'
       +  '<div><div class="s">comisiones pagadas</div><div class="big" data-k="fe-'+book+'">0</div></div>'
       +  '</div>';
-    if(b.positions.length){
-      h += '<table style="margin-top:11px"><tr><th>estado</th><th>abierta</th>'
+    const P = b.positions || [];
+    const cnt = {all:P.length, open:0, win:0, loss:0};
+    for(const p of P) cnt[PF_BUCKET(p)]++;
+    const rows = PFILTER==='all' ? P : P.filter(p => PF_BUCKET(p)===PFILTER);
+    h += '<div class="fb">'
+      +  '<button class="'+(PFILTER==='all'?'on':'')+'" onclick="setPosFilter(\'all\')">'
+      +  'todas <span class="cnt">'+cnt.all+'</span></button>'
+      +  '<button class="'+(PFILTER==='open'?'on':'')+'" onclick="setPosFilter(\'open\')">'
+      +  'abiertas <span class="cnt">'+cnt.open+'</span></button>'
+      +  '<button class="win '+(PFILTER==='win'?'on':'')+'" onclick="setPosFilter(\'win\')">'
+      +  'cerradas ganadoras <span class="cnt">'+cnt.win+'</span></button>'
+      +  '<button class="loss '+(PFILTER==='loss'?'on':'')+'" onclick="setPosFilter(\'loss\')">'
+      +  'cerradas perdedoras <span class="cnt">'+cnt.loss+'</span></button></div>';
+    if(!P.length){
+      h += '<div class="s" style="margin-top:9px">Sin posiciones todavía. El capital está '
+        +  'entero y sin tocar: no se ha comprado nada.</div>';
+    } else if(!rows.length){
+      h += '<div class="s" style="margin-top:6px">Ninguna posición en este filtro.</div>';
+    } else {
+      /* Subtotal de lo que se está mirando: elegir "cerradas perdedoras" y ver el daño sumado
+         es la razón de tener el filtro, y obligar a sumarlo a ojo lo desaprovecharía. */
+      let sc=0, sv=0, spl=0, sinprecio=0;
+      for(const p of rows){
+        sc += p.cost||0;
+        if(p.value===null) sinprecio++; else sv += p.value;
+        if(p.pnl!==null) spl += p.pnl;
+      }
+      h += '<div class="s" style="margin:0 0 6px">'+rows.length+' de '+P.length
+        +  ' · coste '+n2(sc,2)+' € · valor '+n2(sv,2)+' € · P&amp;L <b class="'
+        +  (spl>0?'ok':spl<0?'bad':'di')+'">'+(spl>0?'+':'')+n2(spl,2)+' €</b>'
+        +  (sinprecio?(' · <span class="wa">'+sinprecio+' sin precio de salida: no entran en el '
+        +  'valor ni en el P&amp;L</span>'):'')+'</div>';
+      h += '<table><tr><th>estado</th><th>abierta</th>'
         +  '<th class="n">coste €</th><th class="n">valor €</th><th class="n">P&amp;L €</th>'
-        +  '<th class="n">%</th><th>precio</th></tr>';
-      for(const p of b.positions){
+        +  '<th class="n">%</th><th>motivo de salida</th></tr>';
+      for(const p of rows){
         const cl = p.state==='abierta' ? 'wa' : 'di';
-        h += '<tr><td class="'+cl+'">'+esc(p.state)+'</td>'
+        const pl = p.pnl===null ? null : p.pnl;
+        h += '<tr title="'+esc(p.venue||'')+'"><td class="'+cl+'">'+esc(p.state)+'</td>'
           +  '<td class="mo">'+esc((p.opened||'').slice(5,16))+'</td>'
           +  '<td class="num">'+n2(p.cost,2)+'</td>'
           +  '<td class="num">'+(p.value===null?'—':n2(p.value,2))+'</td>'
-          +  '<td class="num '+((p.pnl||0)>0?'ok':(p.pnl||0)<0?'bad':'')+'">'
-          +  (p.pnl===null?'—':(p.pnl>0?'+':'')+n2(p.pnl,2))+'</td>'
+          +  '<td class="num '+((pl||0)>0?'ok':(pl||0)<0?'bad':'')+'">'
+          +  (pl===null?'—':(pl>0?'+':'')+n2(pl,2))+'</td>'
           +  '<td class="num">'+(p.ret===null?'—':(p.ret>0?'+':'')+n2(p.ret*100,1)+'%')+'</td>'
-          +  '<td class="di" style="font-size:11px">'+esc((p.venue||'').slice(0,46))+'</td></tr>';
+          +  '<td class="di" style="font-size:11px">'+esc(p.why||'—')+'</td></tr>';
       }
       h += '</table>';
-    } else {
-      h += '<div class="s" style="margin-top:9px">Sin posiciones todavía. El capital está '
-        +  'entero y sin tocar: no se ha comprado nada.</div>';
     }
     h += '</div>';
   }
