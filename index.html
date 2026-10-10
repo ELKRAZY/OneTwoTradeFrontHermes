@@ -76,6 +76,14 @@ color:var(--di);font:10.5px var(--mo);cursor:pointer;white-space:nowrap}
 .fb button.win.on{background:var(--ok);border-color:var(--ok);color:#06120c}
 .fb button.loss.on{background:var(--bad);border-color:var(--bad);color:#fff}
 .fb .cnt{opacity:.75}
+/* Tablas anchas: se desplazan ELLAS, no la pagina. Medido en un viewport de 390 px: la tabla de
+   posiciones ocupaba 483 px y arrastraba toda la web de lado (document.scrollWidth 509), asi que
+   habia que mover la pantalla entera para leer la ultima columna. El contenedor .tw scrollea en
+   horizontal; la sombra interior de la derecha es la pista de que hay mas contenido ahi. */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;
+box-shadow:inset -14px 0 12px -12px rgba(255,45,149,.55)}
+.tw table{margin-top:11px}
+.nw{white-space:nowrap}
 </style></head><body>
 <div id="gate"><div class="box">
   <h3>FOMO · estado</h3>
@@ -255,14 +263,14 @@ function render(){
         +  (spl>0?'ok':spl<0?'bad':'di')+'">'+(spl>0?'+':'')+n2(spl,2)+' €</b>'
         +  (sinprecio?(' · <span class="wa">'+sinprecio+' sin precio de salida: no entran en el '
         +  'valor ni en el P&amp;L</span>'):'')+'</div>';
-      h += '<table><tr><th>estado</th><th>abierta</th>'
+      h += '<div class="tw"><table><tr><th>estado</th><th>abierta</th>'
         +  '<th class="n">coste €</th><th class="n">valor €</th><th class="n">P&amp;L €</th>'
         +  '<th class="n">%</th><th>motivo de salida</th></tr>';
       for(const p of rows){
         const cl = p.state==='abierta' ? 'wa' : 'di';
         const pl = p.pnl===null ? null : p.pnl;
         h += '<tr title="'+esc(p.venue||'')+'"><td class="'+cl+'">'+esc(p.state)+'</td>'
-          +  '<td class="mo">'+esc((p.opened||'').slice(5,16))+'</td>'
+          +  '<td class="mo nw">'+esc((p.opened||'').slice(5,16))+'</td>'
           +  '<td class="num">'+n2(p.cost,2)+'</td>'
           +  '<td class="num">'+(p.value===null?'—':n2(p.value,2))+'</td>'
           +  '<td class="num '+((pl||0)>0?'ok':(pl||0)<0?'bad':'')+'">'
@@ -270,7 +278,7 @@ function render(){
           +  '<td class="num">'+(p.ret===null?'—':(p.ret>0?'+':'')+n2(p.ret*100,1)+'%')+'</td>'
           +  '<td class="di" style="font-size:11px">'+esc(p.why||'—')+'</td></tr>';
       }
-      h += '</table>';
+      h += '</table></div>';
     }
     h += '</div>';
   }
